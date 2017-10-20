@@ -37,9 +37,9 @@
     </description>
 
     <scm>
-        <connection>scm:svn:http://svn.apache.org/repos/asf/sling/trunk/testing/serversetup</connection>
+        <connection>scm:git:https://gitbox.apache.org/repos/asf/sling-org-apache-sling-testing-serversetup.git</conncetion>
         <developerConnection> scm:svn:https://svn.apache.org/repos/asf/sling/trunk/testing/serversetup</developerConnection>
-        <url>http://svn.apache.org/viewvc/sling/trunk/testing/serversetup</url>
+        <url>https://gitbox.apache.org/repos/asf?p=sling-org-apache-sling-testing-serversetup.git.git</url>
     </scm>
 
     <build>
