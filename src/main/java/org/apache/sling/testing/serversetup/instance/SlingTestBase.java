@@ -19,7 +19,9 @@ package org.apache.sling.testing.serversetup.instance;
 import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -27,6 +29,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.TreeSet;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.sling.testing.clients.ClientException;
 import org.apache.sling.testing.clients.SlingClient;
 import org.apache.sling.testing.clients.osgi.BundlesInstaller;
@@ -300,7 +304,9 @@ public class SlingTestBase implements SlingInstance {
                 final String path = s[0];
                 final String pattern = (s.length > 0 ? s[1] : "");
                 try {
-                    osgiConsoleClient.doGet(path, null, 200).checkContentContains(pattern);
+                    URI uri = new URI(path);
+                    List<NameValuePair> reqParams = extractParams(uri);
+                    osgiConsoleClient.doGet(uri.getPath(), reqParams, 200).checkContentContains(pattern);
                 } catch(ClientException e) {
                     errors = true;
                     log.debug("Request to {}@{} failed, will retry ({})",
@@ -326,6 +332,26 @@ public class SlingTestBase implements SlingInstance {
             log.info(msg);
             fail(msg);
         }
+    }
+
+    /**
+     * Convert the query part of the URI to a list of name value pairs that are suitable
+     * for the client calls
+     */
+    protected List<NameValuePair> extractParams(URI url) throws UnsupportedEncodingException {
+        final List<NameValuePair> paramsList = new ArrayList<>();
+        String query = url.getQuery();
+        if (query == null || query.isEmpty()) {
+            return null;
+        }
+        final String[] pairs = query.split("&");
+        for (String pair : pairs) {
+            final int idx = pair.indexOf("=");
+            final String key = idx > 0 ? URLDecoder.decode(pair.substring(0, idx), "UTF-8") : pair;
+            final String value = idx > 0 && pair.length() > idx + 1 ? URLDecoder.decode(pair.substring(idx + 1), "UTF-8") : null;
+            paramsList.add(new BasicNameValuePair(key, value));
+        }
+        return paramsList;
     }
 
     /**
