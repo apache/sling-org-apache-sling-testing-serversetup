@@ -16,6 +16,17 @@
  */
 package org.apache.sling.testing.serversetup.instance;
 
+import static org.junit.Assert.fail;
+
+import java.io.File;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Properties;
+import java.util.TreeSet;
+
 import org.apache.sling.testing.clients.ClientException;
 import org.apache.sling.testing.clients.SlingClient;
 import org.apache.sling.testing.clients.osgi.BundlesInstaller;
@@ -26,16 +37,9 @@ import org.junit.After;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.net.URI;
-import java.util.*;
-
-import static org.junit.Assert.fail;
-
 /** Base class for running tests against a Sling instance,
  *  takes care of starting Sling and waiting for it to be ready.
  */
-@SuppressWarnings("ALL")
 public class SlingTestBase implements SlingInstance {
     // TODO: unify these
     public static final String TEST_SERVER_URL_PROP = "test.server.url";
@@ -181,12 +185,12 @@ public class SlingTestBase implements SlingInstance {
                     bundlesInstaller.installBundles(toInstall, false);
                     final List<String> symbolicNames = new LinkedList<String>();
                     for (File f : toInstall) {
-                        symbolicNames.add(osgiConsoleClient.getBundleSymbolicName(f));
+                        symbolicNames.add(OsgiConsoleClient.getBundleSymbolicName(f));
                     }
                     bundlesInstaller.waitForBundlesInstalled(symbolicNames,
-                            TimeoutsProvider.getInstance().getTimeout(BUNDLE_INSTALL_TIMEOUT_SECONDS, 10));
+                            TimeoutsProvider.getInstance().getTimeout(BUNDLE_INSTALL_TIMEOUT_SECONDS, 10) * 1000);
                     bundlesInstaller.startAllBundles(symbolicNames,
-                            TimeoutsProvider.getInstance().getTimeout(START_BUNDLES_TIMEOUT_SECONDS, 30));
+                            TimeoutsProvider.getInstance().getTimeout(START_BUNDLES_TIMEOUT_SECONDS, 30) * 1000);
                 } catch(AssertionError ae) {
                     log.info("Exception while installing additional bundles", ae);
                     slingTestState.setInstallBundlesFailed(true);

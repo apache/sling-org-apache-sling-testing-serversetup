@@ -27,7 +27,6 @@ import java.util.concurrent.ConcurrentHashMap;
  *  Helper class for running tests against multiple Sling instances,
  *  takes care of starting the Sling instances and waiting for them to be ready.
  */
-@SuppressWarnings("ALL")
 public class SlingInstanceManager implements Iterable<SlingInstance > {
     private final Map<String, SlingInstance> slingTestInstances = new ConcurrentHashMap<String, SlingInstance>();
 

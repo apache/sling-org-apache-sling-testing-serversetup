@@ -19,7 +19,6 @@ package org.apache.sling.testing.serversetup;
 import java.util.Properties;
 
 import org.apache.sling.testing.serversetup.jarexec.JarExecutor;
-import org.apache.sling.testing.serversetup.jarexec.JarExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
