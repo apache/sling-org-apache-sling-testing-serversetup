@@ -22,14 +22,13 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.apache.sling</groupId>
-        <artifactId>sling</artifactId>
-        <version>30</version>
+        <artifactId>sling-bundle-parent</artifactId>
+        <version>39</version>
         <relativePath />
     </parent>
 
     <artifactId>org.apache.sling.testing.serversetup</artifactId>
     <version>1.0.2-SNAPSHOT</version>
-    <packaging>bundle</packaging>
 
     <name>Apache Sling Server Setup Tools</name>
     <description>
@@ -45,26 +44,12 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-scr-plugin</artifactId>
+                <groupId>biz.aQute.bnd</groupId>
+                <artifactId>bnd-maven-plugin</artifactId>
             </plugin>
             <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <extensions>true</extensions>
-                <configuration>
-                    <instructions>
-                        <Export-Package>
-                            org.apache.sling.testing.serversetup.*,
-                            org.apache.sling.testing.serversetup.jarexec,
-                            org.apache.sling.testing.serversetup.instance
-                        </Export-Package>
-                        <Import-Package>
-                            org.apache.commons.exec.*; resolution:=optional,
-                            *
-                        </Import-Package>
-                    </instructions>
-                </configuration>
+                <groupId>biz.aQute.bnd</groupId>
+                <artifactId>bnd-baseline-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
@@ -72,12 +57,12 @@
     <dependencies>
         <dependency>
             <groupId>org.osgi</groupId>
-            <artifactId>osgi.core</artifactId>
+            <artifactId>org.osgi.annotation.versioning</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.scr.annotations</artifactId>
-            <scope>provided</scope>
+            <groupId>org.osgi</groupId>
+            <artifactId>osgi.core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>

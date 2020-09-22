@@ -1,0 +1,10 @@
+Export-Package: org.apache.sling.testing.serversetup.*,\
+  org.apache.sling.testing.serversetup.jarexec,\
+  org.apache.sling.testing.serversetup.instance
+
+Import-Package: org.apache.commons.exec.*; resolution:=optional,\
+  *
+  
+-removeheaders:\
+  Include-Resource,\
+  Private-Package
