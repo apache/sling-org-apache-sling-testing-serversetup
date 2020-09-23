@@ -33,6 +33,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.sling.testing.clients.ClientException;
 import org.apache.sling.testing.clients.SlingClient;
+import org.apache.sling.testing.clients.SlingHttpResponse;
 import org.apache.sling.testing.clients.osgi.BundlesInstaller;
 import org.apache.sling.testing.clients.osgi.OsgiConsoleClient;
 import org.apache.sling.testing.clients.util.TimeoutsProvider;
@@ -303,10 +304,16 @@ public class SlingTestBase implements SlingInstance {
                 final String [] s = p.split(":");
                 final String path = s[0];
                 final String pattern = (s.length > 0 ? s[1] : "");
+                boolean isRegex = s.length > 1 ? "regexp".equals(s[2]) : false;
                 try {
                     URI uri = new URI(path);
                     List<NameValuePair> reqParams = extractParams(uri);
-                    osgiConsoleClient.doGet(uri.getPath(), reqParams, 200).checkContentContains(pattern);
+                    SlingHttpResponse get = osgiConsoleClient.doGet(uri.getPath(), reqParams, 200);
+                    if (isRegex) {
+                        get.checkContentRegexp(pattern);
+                    } else {
+                        get.checkContentContains(pattern);
+                    }
                 } catch(ClientException e) {
                     errors = true;
                     log.debug("Request to {}@{} failed, will retry ({})",
