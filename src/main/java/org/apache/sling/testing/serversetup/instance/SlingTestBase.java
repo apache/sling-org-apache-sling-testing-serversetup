@@ -51,6 +51,9 @@ public class SlingTestBase implements SlingInstance {
     public static final String TEST_SERVER_USERNAME = "test.server.username";
     public static final String TEST_SERVER_PASSWORD = "test.server.password";
     public static final String SERVER_READY_TIMEOUT_PROP = "server.ready.timeout.seconds";
+    public static final String SERVER_READY_TIMEOUT_INITIAL_DELAY_PROP = "server.ready.timeout.initial.delay.seconds";
+    public static final String SERVER_READY_TIMEOUT_DELAY_PROP = "server.ready.timeout.delay.seconds";
+    public static final String SERVER_READY_QUIET_PERIOD_PROP = "server.ready.quiet.period.seconds";
     public static final String SERVER_READY_PROP_PREFIX = "server.ready.path";
     public static final String KEEP_JAR_RUNNING_PROP = "keepJarRunning";
     public static final String SERVER_HOSTNAME_PROP = "test.server.hostname";
@@ -172,10 +175,25 @@ public class SlingTestBase implements SlingInstance {
             slingTestState.setStartupInfoProvided(true);
             waitForServerReady();
             installAdditionalBundles();
+            waitForQuietPeriod();
             blockIfRequested();
         } catch(Exception e) {
             log.error("Exception in maybeStartServer()", e);
             fail("maybeStartServer() failed: " + e);
+        }
+    }
+
+    /**
+     * Wait for the configured duration as a quite period to let the server settle down after
+     * doing the startup and install additional bundles work.
+     */
+    protected void waitForQuietPeriod() throws InterruptedException {
+        final String quietPeriodSecProp = systemProperties.getProperty(SERVER_READY_QUIET_PERIOD_PROP, "0");
+        final int quietPeriodSec = TimeoutsProvider.getInstance().getTimeout(Integer.valueOf(quietPeriodSecProp));
+        final int quietPeriodMs = quietPeriodSec * 1000;
+        if (quietPeriodMs > 0) {
+            log.info("Waiting {} seconds as a quiet period", quietPeriodSec);
+            Thread.sleep(quietPeriodMs);
         }
     }
 
@@ -277,9 +295,20 @@ public class SlingTestBase implements SlingInstance {
         }
 
         // Timeout for readiness test
-        final String sec = systemProperties.getProperty(SERVER_READY_TIMEOUT_PROP);
-        final int timeoutSec = TimeoutsProvider.getInstance().getTimeout(sec == null ? 60 : Integer.valueOf(sec));
-        log.info("Will wait up to " + timeoutSec + " seconds for server to become ready");
+        TimeoutsProvider tp = TimeoutsProvider.getInstance();
+        final String sec = systemProperties.getProperty(SERVER_READY_TIMEOUT_PROP, "60");
+        final int timeoutSec = tp.getTimeout(Integer.valueOf(sec));
+
+        final String initialDelaySec = systemProperties.getProperty(SERVER_READY_TIMEOUT_INITIAL_DELAY_PROP, "0");
+        final int timeoutInitialDelaySec = tp.getTimeout(Integer.valueOf(initialDelaySec));
+        final int timeoutInitialDelayMs = timeoutInitialDelaySec * 1000;
+
+        final String delaySec = systemProperties.getProperty(SERVER_READY_TIMEOUT_DELAY_PROP, "1");
+        final int timeoutDelaySec = tp.getTimeout(Integer.valueOf(delaySec));
+        final int timeoutDelayMs = timeoutDelaySec * 1000;
+
+        log.info("Will wait up to {} seconds for server to become ready with a {} second initial delay and {} seconds between each check",
+                new Object[] {timeoutSec, timeoutInitialDelaySec, timeoutDelaySec});
         final long endTime = System.currentTimeMillis() + timeoutSec * 1000L;
 
         // Get the list of paths to test and expected content regexps
@@ -291,6 +320,11 @@ public class SlingTestBase implements SlingInstance {
             if(key.startsWith(SERVER_READY_PROP_PREFIX)) {
                 testPaths.add(systemProperties.getProperty(key));
             }
+        }
+
+        if (timeoutInitialDelayMs > 0) {
+            // wait for the initial deal duration
+            Thread.sleep(timeoutInitialDelayMs);
         }
 
         // Consider the server ready if it responds to a GET on each of
@@ -330,7 +364,7 @@ public class SlingTestBase implements SlingInstance {
                 log.info("All {} paths return expected content, server ready", testPaths.size());
                 break;
             }
-            Thread.sleep(TimeoutsProvider.getInstance().getTimeout(1000L));
+            Thread.sleep(timeoutDelayMs);
         }
 
         if (!slingTestState.isServerReady()) {
