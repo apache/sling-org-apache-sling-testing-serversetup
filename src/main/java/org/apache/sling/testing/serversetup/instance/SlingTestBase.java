@@ -188,6 +188,10 @@ public class SlingTestBase implements SlingInstance {
      * doing the startup and install additional bundles work.
      */
     protected void waitForQuietPeriod() throws InterruptedException {
+        if (slingTestState.isQuietPeriodComplete()) {
+            // already waited, so no need to do that again
+            return;
+        }
         final String quietPeriodSecProp = systemProperties.getProperty(SERVER_READY_QUIET_PERIOD_PROP, "0");
         final int quietPeriodSec = TimeoutsProvider.getInstance().getTimeout(Integer.valueOf(quietPeriodSecProp));
         final int quietPeriodMs = quietPeriodSec * 1000;
@@ -195,6 +199,7 @@ public class SlingTestBase implements SlingInstance {
             log.info("Waiting {} seconds as a quiet period", quietPeriodSec);
             Thread.sleep(quietPeriodMs);
         }
+        slingTestState.setQuietPeriodComplete(true);
     }
 
     protected void installAdditionalBundles() {

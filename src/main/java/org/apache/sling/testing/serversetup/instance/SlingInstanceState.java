@@ -40,6 +40,7 @@ public class SlingInstanceState {
     private boolean startupInfoProvided = false;
     private boolean serverInfoLogged = false;
     private JarExecutor jarExecutor;
+    private boolean quietPeriodComplete = false;
 
     /**
      * List of the urls of currently started servers
@@ -140,4 +141,13 @@ public class SlingInstanceState {
     public void setServerBaseUrl(String serverBaseUrl) {
         this.serverBaseUrl = serverBaseUrl;
     }
+
+    public boolean isQuietPeriodComplete() {
+        return quietPeriodComplete;
+    }
+
+    public void setQuietPeriodComplete(boolean quietPeriodComplete) {
+        this.quietPeriodComplete = quietPeriodComplete;
+    }
+
 }
